@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #weatherResult {
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Forecast</h1>
+        <form id="locationForm">
+            <input type="text" id="locationInput" placeholder="Enter location (e.g., city name)" required>
+            <button type="submit">Get Forecast</button>
+        </form>
+        <div id="weatherResult"></div>
+    </div>
+
+    <script>
+        document.getElementById('locationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const location = document.getElementById('locationInput').value.trim();
+
+            if (location === '') {
+                alert('Please enter a location.');
+                return;
+            }
+
+            try {
+                const weatherData = await getWeatherData(location);
+                displayWeather(weatherData);
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                alert('Error fetching weather data. Please try again.');
+            }
+        });
+
+        async function getWeatherData(location) {
+            const apiKey = 'your_weather_api_key'; // Replace with your API key
+            const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${location}&units=metric&appid=${apiKey}`;
+
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error('Weather data not available for this location.');
+            }
+
+            const data = await response.json();
+            return data;
+        }
+
+        function displayWeather(weatherData) {
+            const weatherResult = document.getElementById('weatherResult');
+            weatherResult.innerHTML = ''; // Clear previous results
+
+            const cityName = weatherData.city.name;
+            const forecastList = weatherData.list.slice(0, 5); // Display forecast for next 5 days
+
+            const resultHTML = `<h2>Weather forecast for ${cityName}</h2>
+                               <ul>
+                                   ${forecastList.map(item => `
+                                       <li>${item.dt_txt}: ${item.main.temp} °C, ${item.weather[0].description}</li>
+                                   `).join('')}
+                               </ul>`;
+
+            weatherResult.innerHTML = resultHTML;
+        }
+    </script>
+</body>
+</html>
+
+
